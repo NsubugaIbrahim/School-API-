@@ -1,13 +1,14 @@
 FROM php:8.2-apache
 
-# 1. Install system dependencies and PHP extensions required by Laravel & Composer
+# 1. Install system dependencies and PHP extensions (Added libzip-dev and zip)
 RUN apt-get update && apt-get install -y \
     unzip \
     git \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    && docker-php-ext-install pdo pdo_mysql bcmath mbstring \
+    libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql bcmath mbstring zip \
     && rm -rf /var/lib/apt/lists/*
 
 # 2. Get official Composer binary
@@ -25,8 +26,9 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.
 WORKDIR /var/www/html
 COPY . /var/www/html/
 
-# 6. Install PHP dependencies (disabling scripts so it doesn't try running artisan without DB/ENV)
+# 6. Install PHP dependencies (Added COMPOSER_MEMORY_LIMIT=-1)
 ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
 RUN composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader
 
 # 7. Set correct permissions for Laravel storage and cache directories
