@@ -1,20 +1,36 @@
 FROM php:8.2-apache
 
-# Install required PHP extensions for Laravel (e.g., pdo_mysql)
-RUN docker-php-ext-install pdo pdo_mysql
+# 1. Install system dependencies and PHP extensions required by Laravel & Composer
+RUN apt-get update && apt-get install -y \
+    unzip \
+    git \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    && docker-php-ext-install pdo pdo_mysql bcmath mbstring
 
-# Enable Apache mod_rewrite for Laravel routing
+# 2. Get official Composer binary
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# 3. Enable Apache mod_rewrite for Laravel routing
 RUN a2enmod rewrite
 
-# Point Apache DocumentRoot to Laravel's /public folder
+# 4. Point Apache DocumentRoot to Laravel's /public folder
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Copy project files into Apache container
+# 5. Set working directory and copy project files into container
+WORKDIR /var/www/html
 COPY . /var/www/html/
 
-# Set correct permissions for Laravel storage and cache directories
+# 6. Install PHP dependencies and generate autoload files
+RUN composer install --no-dev --optimize-autoloader
+
+# 7. Set correct permissions for Laravel storage and cache directories
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
+
+# 8. Run database migrations on container start, then run Apache in the foreground
+CMD php artisan migrate --force && apache2-foreground
