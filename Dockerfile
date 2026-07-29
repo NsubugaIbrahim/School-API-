@@ -1,6 +1,6 @@
-FROM php:8.2-apache
+FROM php:8.4-apache
 
-# 1. Install system dependencies and PHP extensions (Added libzip-dev and zip)
+# 1. Install system dependencies and PHP extensions required by Laravel & Composer
 RUN apt-get update && apt-get install -y \
     unzip \
     git \
@@ -26,10 +26,9 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.
 WORKDIR /var/www/html
 COPY . /var/www/html/
 
-
-# 6. Install PHP dependencies (Added --no-cache to prevent Out of Memory crashes)
+# 6. Install PHP dependencies matching your local PHP 8.4 environment
 ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-cache
+RUN composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --no-cache
 
 # 7. Set correct permissions for Laravel storage and cache directories
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
@@ -37,7 +36,4 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 EXPOSE 80
 
 # 8. Run optimizations, database migrations, and start Apache at runtime
-CMD php artisan config:cache && echo "config OK" && \
-    php artisan route:cache && echo "routes OK" && \
-    php artisan migrate --force && echo "migrate OK" && \
-    apache2-foreground
+CMD php artisan config:cache && php artisan route:cache && php artisan migrate --force && apache2-foreground
