@@ -7,7 +7,8 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    && docker-php-ext-install pdo pdo_mysql bcmath mbstring
+    && docker-php-ext-install pdo pdo_mysql bcmath mbstring \
+    && rm -rf /var/lib/apt/lists/*
 
 # 2. Get official Composer binary
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -24,13 +25,14 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.
 WORKDIR /var/www/html
 COPY . /var/www/html/
 
-# 6. Install PHP dependencies and generate autoload files
-RUN composer install --no-dev --optimize-autoloader
+# 6. Install PHP dependencies (disabling scripts so it doesn't try running artisan without DB/ENV)
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader
 
 # 7. Set correct permissions for Laravel storage and cache directories
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
 
-# 8. Run database migrations on container start, then run Apache in the foreground
-CMD php artisan migrate --force && apache2-foreground
+# 8. Run optimizations, database migrations, and start Apache at runtime
+CMD php artisan config:cache && php artisan route:cache && php artisan migrate --force && apache2-foreground
