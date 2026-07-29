@@ -26,10 +26,10 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.
 WORKDIR /var/www/html
 COPY . /var/www/html/
 
-# 6. Install PHP dependencies (Added COMPOSER_MEMORY_LIMIT=-1)
+
+# 6. Install PHP dependencies (Added --no-cache to prevent Out of Memory crashes)
 ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV COMPOSER_MEMORY_LIMIT=-1
-RUN composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --ignore-platform-reqs
+RUN composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-cache
 
 # 7. Set correct permissions for Laravel storage and cache directories
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
