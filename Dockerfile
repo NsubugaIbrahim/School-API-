@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql bcmath mbstring zip \
+    libpq-dev \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql bcmath mbstring zip \
     && rm -rf /var/lib/apt/lists/*
 
 # 2. Get official Composer binary
