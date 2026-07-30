@@ -36,5 +36,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 EXPOSE 80
 
-# 8. Run optimizations, database migrations, and start Apache at runtime
-CMD php artisan config:cache && php artisan route:cache && php artisan migrate --force && apache2-foreground
+# 8. Run optimizations, database migrations, seeders, and start Apache at runtime
+CMD php artisan config:cache && php artisan route:cache && php artisan migrate --force && php artisan db:seed --force && apache2-foreground

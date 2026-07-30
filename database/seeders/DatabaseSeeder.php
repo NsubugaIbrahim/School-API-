@@ -36,6 +36,11 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // If database is already seeded, stop immediately
+        if (\App\Models\User::exists()) {
+            $this->command->info('Database already seeded. Skipping.');
+            return;
+        }
         // ── Roles ──
         $roles = [];
         foreach (['Admin', 'Teacher', 'Bursar', 'Student', 'Parent'] as $name) {
