@@ -99,6 +99,11 @@ class DatabaseSeeder extends Seeder
             'password_hash' => Hash::make('password'), 'role_id' => $roles['Student']->role_id, 'phone' => '0701111111',
         ]);
 
+        $studentUser = User::create([
+            'full_name' => 'Nsubuga Ibrahim', 'username' => 'nsubuga', 'email' => 'ibrahimnazel942@gmail.com',
+            'password_hash' => Hash::make('password'), 'role_id' => $roles['Student']->role_id, 'phone' => '0726496803',
+        ]);
+
         $parentUser = User::create([
             'full_name' => 'Aisha Nalubega (Parent)', 'username' => 'analubega_p', 'email' => 'aisha.parent@gmail.com',
             'password_hash' => Hash::make('password'), 'role_id' => $roles['Parent']->role_id, 'phone' => '0702222222',
