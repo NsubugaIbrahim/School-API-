@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ResetPasswordCode;
 
 class PasswordResetController extends Controller
 {
@@ -41,12 +43,21 @@ class PasswordResetController extends Controller
             ]
         );
 
-        // TODO: In a real app, send the code via email.
-        // For now, we'll return it in the response for development purposes.
+        // Send the actual email
+        try {
+            Mail::to($email)->send(new ResetPasswordCode($code));
+        } catch (\Exception $e) {
+            // Log the error but return success if the record was saved.
+            // In a real app, you might want to handle this differently.
+            return response()->json([
+                'message' => 'Password reset record created, but we had trouble sending the email.',
+                'error' => $e->getMessage(),
+                'dev_code' => $code // Fallback for debugging
+            ], 500);
+        }
 
         return response()->json([
             'message' => 'Reset code sent to your email.',
-            'dev_code' => $code // REMOVE THIS IN PRODUCTION
         ]);
     }
 
