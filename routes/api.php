@@ -26,6 +26,8 @@ use App\Http\Controllers\Api\StudentResultController;
 
 // ───────────── Auth (public) ─────────────
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/password/forgot', [PasswordResetController::class, 'sendResetCode']);
+Route::post('/auth/password/reset', [PasswordResetController::class, 'resetPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -54,10 +56,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dropdown population endpoint
     Route::get('/exams/published', [StudentResultController::class, 'getAvailableExams']);
-    
+
     // Fetch individual exam performance card details
     Route::get('/exams/{exam_id}/results', [StudentResultController::class, 'getExamResults']);
-   
+
     // Staff Dashboard Route
     Route::get('/staff/dashboard', [DashboardController::class, 'getDashboardData']);
 
